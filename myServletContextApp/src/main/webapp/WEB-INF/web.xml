@@ -12,7 +12,7 @@
   </context-param>
   <context-param>
     <param-name>password</param-name>
-    <param-value>nFyQ$hCpx8jCfvkf</param-value>
+    <param-value>xxxxxx</param-value>
   </context-param>
   
   <servlet>
