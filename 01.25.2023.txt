@@ -1,0 +1,150 @@
+BIG-7 Methods
+-------------
+Whats the difference between GET and POST request types?
+
+GET=>
+	if we want to get some info from the server, then we need to go for GET request.
+	usually GET requests are read only requests & at the server side, update operation won't be performed.
+	end user provided info will be attached to the url in the form of "QueryString":
+		http://localhost:9999/App-01/test?source=bengaluru&destination=shivamoghaa
+	end user data is available inside url as query string so its less secure.
+	since the data is attached in the url as query string, only small volume of data can be sent.
+	bookmarking & caching is supported.
+
+POST=>
+	used to send huge amount of data to the server.
+	usually POST requests are write only requests & at the server side, update/insert operation would be performed.
+	end user provided info will not be attached to the url in the form of "QueryString":
+		http://localhost:9999/App-01/test
+	end user data is not available inside url as query string so its more secure.
+	since the data is not available inside url as query string, large volume of data can be sent.
+	bookmarking & caching is not supported.
+-----------------------------------------------
+What is idempotent request?
+	if there is no change in the reponse when repeating the request multiple times.
+	GET request is idempotent request & POST is not.
+What is a safe request?
+	if there is no side effect at the server side when repeating the request multiple times.
+	GET request is safe reqyest & POST is not.
+--------------------------------------------------
+How to send GET request?
+	1. Type address in url bar & hit enter (request is sent)
+	2. Clicking the hyperlink
+		<a href="#">CLICK HERE</a>
+	3. Submit the form with method attribue as "GET"
+		<form method ="GET">
+			<!--- -->
+		</form>
+	4. Submit the formwithout method attribute(default is GET)
+		<form>
+			<!--- -->
+		</form>
+
+How to send POST request?
+	1. Submit the form with the method attribute as "POST"
+		<form method ="POST">
+			<!--- -->
+		</form>
+
+**NOTE
+	When we send the request, automatically the HTTPProtocol creates the HTTPRequest Object.
+	The relevant info will be assigned in the respective sections of HTTPRequest Object.
+	This HTTPRequest Object will be taken to HTTPProtocol & it'll send it to tge respective Server.
+
+	Upon sending the response, automatically the HTTPProtocol creates the HTTPResponse Object.
+	The relevant info will be assigned in the respective sections of the HTTPResponse Object.
+	This HTTPResponse Object will be taken by HTTPProtocol to the browser & brower uses this info for displaying the output.
+--------------------------------------------------
+To build web application, we need to follow standard structure given by Server Vendor:
+	ProjectName
+		|=> WEB-INF
+			|=> web.xml(deployment descriptor)
+			|=> classes
+				|=> .class
+			|=> lib
+				|=> *.jar
+
+			|=> src/main/java
+				|=> .java
+			|=> pages
+				|=> .jsp
+--------------------------------------------------
+Hot to create Servlet in Java?
+	3 approaches
+	1. Servlet(I)
+	2. GenericServlet(AC)
+	3 HTTPServlet(AC)
+
+Servlet(I)
+public interface Servlet {
+	public abstract void init(ServletConfig config) throws ServletException;
+	public abstract ServletConfig getServletConfig();
+	public abstract void service(ServletRequest request,ServletResponse response) throws ServletException, IOException;
+	public abstract String getServletInfo();
+	public abstract void destroy();
+}
+	
+
+Whenever we write Servlet, automatically the written servlet container will perform:
+
+	1. Depending on the url pattern supplied but the user for a dynamic resource
+		a. Servlet Loading ---> static block will be executed
+		b. Service Instantiation ---> contructor will be called & object created
+		c. Servlet Initialization ---> void init(ServletConfig config) throws ServletException
+		d. Servlet Request Processing ---> void service(ServletRequest request, ServletResponse response) throws ServletException, IOException
+		e. Servlet De-Instantiation ---> void destroy();
+
+eg#1.
+import java.io.*;
+import javax.servlet.*;
+public class FirstServlet implements Servlet{
+	static{
+		System.out.println("FirstServlet.class file is loading...");
+	}
+	public FirstServlet(){
+		System.out.println("FirstServlet Object is instantiated...");
+	}
+	//For Servlet Initialization container calls this method
+	public void init(ServletConfig config) throws ServletException{
+		System.out.println("Servlet initialziation...");
+	}
+	public ServletConfig getServletConfig(){
+		return null;
+	}
+	//Request Processing logic
+	public void service(ServletRequest request,ServletResponse response) throws ServletException, IOException{
+		System.out.println("Servlet Request Processing ...");
+	}
+	public String getServletInfo(){
+		return null;
+	}
+	//Servlet DeInstantion logic
+	public void destroy(){
+		System.out.println("Servlet De-Instantiation...");
+	}
+}
+
+	2. After creating a Servlet, for every servlet url-pattern matching should be provided & it should be informed to the container via XML, Annotation
+
+XML
+<web-app>
+	<servlet>
+		<servlet-name>DemoServlet</servlet-name>
+		<servlet-class>FirstServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DemoServlet</servlet-name>
+		<url-pattern>/test</url-pattern>
+	</servlet-mapping>
+</web-app>
+
+	3. Before compilation, set path & classpath environmental variable:
+		set path= C:\programfiles\jdk1.8\bin
+		set classpath=;.;C:\Tomcat 9.0\lib\servlet-api.jar
+	After compilation of FirstServlet.java, copy the .class file to classes folder under WEB-INF/classes
+
+	4. Start the Servlet by going to:
+		tomcat9.0/bin/tomcat9.exe file
+
+	5. Send the request by typing the url:
+		http://localhost:9999/FirstApp/test

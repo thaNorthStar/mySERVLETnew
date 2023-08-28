@@ -1,0 +1,236 @@
+Standard Folder Structure of Webapps to Deploy in Tomcat Server
+---------------------------------------------------------------
+webapps(deployment folder)
+	|
+SecondApp
+	|=> WEB-INF
+		|=> web.xml(deployment descriptor)
+		|=> classes
+			|=> *.class
+	|=> src/main/java
+		|=> .java
+
+Any Servlet will be executed by the container with its life cycle actions
+	a. Loading
+	b. Instantiation
+	c. Initialization
+	d. RequestProcessing phase
+	e. De-Instantiation
+--------------------------------------------------
+What is the meaning of webapps(deployment folder)?
+Once we start the server, server would automatically go to webapp's folder & scans all projects present inside & deploys the project in the execution area(meaning ready for the service).
+Since it scans for all the projects, we say webapp's folder as "deployment folder".
+Once Tomcat engine loads all the projects into the execution area, it'll create seperate object for every project called "ServletContext" object.
+Tomcat also scans web.xml file given by user w.r.t. every project.
+It reads the url-pattern for all the dymanic resource for future use.
+-------------------------------------------
+How to send the request to any application?
+using the url-pattern:
+http://localhost:9999/[NameOfTheApplication/ContextRoot]/[Url_PatternOfTheResource]
+------------------------------------------------------------------------------------------------------------------
+Assume the request is sent for a particular url_pattern, then what actions will be taken care of by Tomcat engine?
+	eg: http://localhost:9999/SecondApp/demo
+
+Step 1: Browser will send the request with the following url-pattern:
+	http://localhost:9999/SecondApp/demo
+
+Step 2: HTTPProtocol will create a HTTPRequest object depending on the Request_TYPE to carry tje request data from client to server
+
+Step 3: Once the Protocol hands over the HTTPRequest Object to the Tomcat server, server will pick up the RequestLine from the HTTPRequest object & take only ContextName/url-pattern for further processing
+
+Step 4: Depending upon the dynamic resource identified by url-pattern, Tomcat engine will hand over control to container for execution. Container will scan for web.xml file & identifies for a particular url_pattern which servlet should be executed; based on that, the server will be executed by the container.
+
+Step 5: As per the container life cycle actions, the requested url-pattern servlet will be executed.
+	1. Servlet Loading (.class file loading)
+		Class c=Class.forName("SecondServlet");
+	2. Servlet Instantiation (for loaded class, create an Object)
+		SecondServlet obj=(SecondServlet)c.newInstance();
+	3. Servlet Initialization (for the created object, inject the required values)
+		obj.init(ServletConfig config);
+	4. Request Processing phase (for client request, this method will be called)
+		obj.service(ServletRequest request, ServletResponse response);
+***********
+Note:	To get the inputs supplied by the user to the Servlet, we need to use "ServletRequest" Object.
+	To write the output from the application to the browser, we need to use "ServletResponse" Object.
+	Inside the ServletResponse Object, we have empty "PrintWriter Object, using which we need to write the output to the browser window.
+	If we use System.out.println() in the request processing logic, then output will be available on the console of the Tomcat emgine.
+***********
+	5. Once the server is stopped(undeployment) for the same resource, if the request won't come for some period of time, automatically container will execute "De-Instantiation" event.
+		obj.destroy();
+
+Before sending the request, we need to keep the compiled code in WEB-INF/classes folder:
+	C:\Tomcat 9.0\webapps\SecondApp>set path=C:\Program Files\Java\jdk1.8.0_202\bin
+	C:\Tomcat 9.0\webapps\SecondApp>set classpath=C:\Tomcat 9.0\lib\servlet-api.jar
+	C:\Tomcat 9.0\webapps\SecondApp>javac SecondServlet.java
+Once the compiled code is available, then we need to start the server:
+	C:\tomcat9.0\bin\tomcat9.exe
+------------------------
+Output for First Request:
+	SecondServlet .class file is loading...
+	SecondServlet Object is instantiated...
+	Servlet initialziation...
+	Servlet Request Processing ...
+Output for Second Request:
+	Servlet Request Processing ...
+
+As we noticied above, the processing time for the second request is less than when compared to first request because only the RequestProcessing logic is executed.
+-----------------------------------------------------------------
+How to maintain uniformity of response time for all the requests?
+	To uniform response time for all requests, we need to configure the Tomcat Engine in 1 of 2 ways:
+		a. XML ( <load-on-startup>any+ve number</load-on-startup> )
+		b. Annotation
+
+To maintain the uniform response time, we need to use <load-on-startup> tag:
+<web-app>
+	<servlet>
+		<servlet-name>DemoServlet</servlet-name>
+		<servlet-class>SecondServlet</servlet-class>
+		<load-on-startup>10</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DemoServlet</servlet-name>
+		<url-pattern>/demo</url-pattern>
+	</servlet-mapping>
+</web-app>
+
+At the Time of Server startup:
+	SecondServlet .class file is loading...
+	SecondServlet Object is instantiated...
+	Servlet initialziation...
+Output for First Request:
+	Servlet Request Processing ...
+Output for Second Request:
+	Servlet Request Processing ...
+------------------------------
+Servlet Code w.r.t. Annotation
+	Use the following annotations on the top of the Servlet class:
+		@WebServlet(urlPatterns="/test",loadOnStartup = 10)
+--------------------------------------------
+Limitation of Implementing Servlet Interface
+	If we create a Servlet using Servlet(I), then its mandatory for us to give the implementation for all the methods of the Interface whether its required or not.
+Because of this, the length of code would increase & readability decreases.
+To overcome this problem, we need to use "GenericServlet".
+
+GenericServlet has already implemented Servlet(I) & it gives the body for all the methods of Servlet(I) except service().
+If we use GenericSerlvet to create a Servlet, then we need togive body only for service() & as a result, the lines of code would be less which increases the readability of the application.
+
+Compiled from "GenericServlet.java"
+public abstract class GenericServlet implements Servlet,ServletConfig,Serializable {
+	public GenericServlet();
+	public void init(ServletConfig config) throws ServletException;
+	public void destroy();
+	public ServletConfig getServletConfig();
+	public ServletContext getServletContext();
+	public String getServletInfo();
+	public void init() throws javax.servlet.ServletException;
+	public abstract void service(ServletRequest req, ServletResponse resp) throws ServletException, IOException;
+	public java.lang.String getServletName();
+}
+**Note:
+	GenericServlet is best example for "Adapter Class Design Pattern"
+		init() is overloaded in GenericServlet
+**Note:
+	by default, response type/content type is "text/html".
+----------------------------------------------------------------
+Code to Demonstrate the Creation of Servlet Using GenericServlet:
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.annotation.*;
+@WebServlet(urlPatterns="/disp")
+public class FourthServlet extends GenericServlet{
+	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException{
+		PrintWriter out = response.getWriter();
+		out.println("<h1 style='color:blue;'>Writing Servlet using Generic Servlet is easy....</h1>");
+		out.close();
+	}
+}
+
+Behind The Scenes
+-----------------
+In the above code, 2 .class files will be used:
+	1. FourthServlet.class
+	2. GenericServlet.class
+--> Loading = container will load FourthServlet.class file for the url-pattern ( "/disp" )
+--> Instantiation = container will create an Object for FourthServlet.class
+--> Initialization = container will call init()
+	..1st it'll check in FourthServlet.class
+	..if not, then it'll check in GenericServlet
+	init() is available inside GenericServlet but it has 2 methods with the name:
+		init(SC config)
+		init()
+	container will call init(SC config) which internally makes a call to init()
+	-------------------------------
+	Can we override the init logic?
+		We can overried, but its good practice to only override init(), but not init(SC config because config is a local variable in init(SC config), & the config variable memory would be gone once the control comes out of the init(SC Config).
+	----------------------
+	Code in GenericServlet
+	public abstract class GenericServlet implements Servlet,ServletConfig,Serializable{
+		private transient SC config;
+		public void init(SC config)throws SE{
+			this.config=config;
+			init();
+		}
+		public void init() throws SE{
+			;;;;;;
+		}
+		;;;;;;;;
+	}
+	----------------------
+--> RequestProcessing phase = container will call service(req,resp) to provide response to the client.
+	..1st it'll check in FourthServlet.class
+	..if not, then it'll check in GenericServlet
+	service(req,resp) is available inside GenericServlet as abstract & we need to give the body of this method inside FourthServlet as shown in above program.
+--> ServletDeinstantiation = container will call destroy() to perform De-Instantiation action.
+	..1st it'll check in FourthServlet.class
+	..if not, then it'll check in GenericServlet
+	destroy() is not available in FourthServlet so it'll take from GenericServlet.class & will execute.
+**Note:
+	1. If our servlet class does not contains init() method 
+		a. GS: init(SC)
+		b. GS: init()
+c. US: service(req,resp)
+	2. If our servlet class contains init(SC) method
+		a. US: init(SC)
+		b. US: service(req,resp)
+	3. If our servlet class contains init() method
+		a. GS: init(SC)
+		b. US: init(SC)
+		c. US: service(req,resp)
+-----------------------------------------------
+Why 2 init(),init(SC config) in GenericServlet?
+	init(SC config) -> container
+	init() -> developer
+-----------------------------------------------
+Which init method is best suited for developer?
+	init() => best suited for writing initialziation logic.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

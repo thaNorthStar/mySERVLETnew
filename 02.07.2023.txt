@@ -1,0 +1,32 @@
+Session Tracking Mechanism
+--------------------------
+As a part of webapplication, its essential to manage the client previous request data at time of processing later request.
+
+Solution 1-
+	Usage of request object
+		request object gets created, when we send the request to the application & it gets destroyed at the time of sending the response, so we can't keep track of the client previous data using "request object"
+
+Solution 2-
+	Usage of context object
+		if we use context object, then the data will be shared to all components of the application & to all the users of the application where we can't differentiate the data between the users, so not a good approach.
+
+In webapplication, to manage the client previous request data at the time of processing later request, we need to have a clear cut seperation between the client's data.
+	To manage this we need to go for Server side mechanism called "SessionTracking".
+
+Session
+-------
+	refers to the amount of time the client spends with the server.
+	State of the Session
+		The data which is transferred between client & server through multiple number of requesting during a particular session then that data is called "State of the Session".
+	In webapplication, as soon as we start the server, ServletContent object is created, when we send the request to the application HttpServletRequest object is created, similarly we need to write a code to create "HttpSession" object.
+	If multiple users of the application, then we need to write a code to create seperate "HttpSession" object & we need to manage the object, to manage these sessions objects we need to learn "SessionTracking mechanism".
+
+There are 4 SessionTracking mechanisms
+--------------------------------------
+1. HttpSession Tracking
+2. Cookie Session Tracking
+3. URL-Rewriting Session Tracking
+4. Hidden Form Field Session Tracking
+
+As per SUN specification for ServletAPI, we have only 3 mechanism for SessionTracking
+

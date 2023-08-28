@@ -1,0 +1,178 @@
+commonly used packages in Servlet Coding
+javax.servlet.*
+javax.servlet.http.*
+
+Using these interfaces, abstraction is promoted through which WODA is achieved:
+	ServletRequest(I)
+	ServletResponse(I)
+	HttpServletRequest(I)
+	HttpServletResponse(I)
+	ServletContext(I)
+	ServletConfig(I)
+
+void init(ServletConfig config) throws SE,IOE {
+}
+void doXXXX(HttpServletRequest request, HttpServletResponse response)throws SE,IOE 
+	//request => QueryString data in the form of key-value pair
+	//response=> PrintWriter object will be there with empty response
+}
+-------------------------------------------------------------------
+w.r.t tomcat server, the implementation classnames are shown below:
+Implementation class of config is: org.apache.catalina.core.StandardWrapperFacade
+Implementation class of context is: org.apache.catalina.core.ApplicationContextFacade
+Implementation class of request is: org.apache.catalina.connector.RequestFacade
+Implementation class of response is: org.apache.catalina.connector.ResponseFacade
+------------------------------------------------
+Different types of scope & attributes in Servlet
+	Scope refers to the accessability of a variable
+		a. local scope -->> restricted inside method
+		b. global scope -->> available in all methods of a particular task
+There are 3 types of parameters(k,v) possible in Servlet
+		a. Form parameters (QueryString[k,v])
+		b. ServletInitializationParameters (ServletConfig[k,v])
+		c. ContextInitializationParameters(ServletContext[k,v])
+The 3 above parameters type are read-only.
+From the Servlet, we can perform only read operation.
+W cannot modify or remove values based on our requirement, so we say parameter type of data is parameter data -->> both key & value should be Strings of the webapplication.
+parameter data -->> both key & value should be String
+
+To resolve this problem, we should go for "attributes" type of data.
+Based on our requirement, we can add data, remove the data & share the data between the components of the application.
+attribute -->> key should be String, value can be any Object
+
+Based on our requirement, we need to store the attributes in particular scope.
+In Servlet we have 3 types of scope
+	1. request
+	2. session(HTTPSessionTracking)
+	3. application/context
+
+1. request
+	-->> this scope is maintained by ServletRequest/HTTPServletRequest object
+	-->> this scope will start at time of Request Object creation (before calling service())
+	-->> this scope will destroy at the time of Object destruction (after calling service())
+	-->> the data stored in the Request Object will be available for all components which are processing that request.
+
+3. application/context
+	-->> this scope is maintained by ServletContext Object
+	-->> this scope will start at time of Request Object ceation (during deployment)
+	-->> this scope will destroy at time of Context Object destruction (during undeployment)
+	-->> the data stored in the Context Object will be available for all the components of the application irrespective of request & the user.
+
+W.A.P. to display hit count (number of requests) of a web application?
+	firstreq = > hitcount = 1
+	refer: ScopeApp
+
+W.A.P. to display all the attribute info present in application scope?
+	**Note:
+		In ApplicationScope container will add some attributes for internal purpose.
+-------------------------
+Getting Info From The URL
+	1. getRequestURI()
+	2. getQueryString
+	3. getServletPath()
+	4. getPathInfo()
+	5. getContextPath()
+
+package in.ineuron.controller;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+@WebServlet("/test/iNeuron/*")
+public class TestServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	@Override
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter out = response.getWriter();
+		out.println("<h1>Request URI :: "+request.getRequestURI()+"</h1>");
+		out.println("<h1>Context Path ::"+request.getContextPath()+"</h1>");
+		out.println("<h1>Servlet Path ::"+request.getServletPath()+"</h1>");
+		out.println("<h1>Path Info ::"+request.getPathInfo()+"</h1>");
+		out.println("<h1>Query String ::"+request.getQueryString()+"</h1>");
+		out.close();
+	}
+}
+request
+http://localhost:9999/RequestAppInfo/test/iNeuron/hyder/java?
+name=sachin&password=tendulkar
+response
+Request URI :: /RequestAppInfo/test/iNeuron/hyder/java
+Context Path ::/RequestAppInfo
+Servlet Path ::/test/iNeuron
+Path Info ::/hyder/java
+Query String ::name=sachin&password=tendulkar
+----------
+Deployment
+	Hard Deployment
+		Creating an webapplication inside webapps folder of tomcat and starting the server manually is called "hard-deployment".
+	Smooth Deployment
+		Creating an application outside the webapps folder of tomcat and starting the server through some additional set up is called "smooth-deployment".
+
+**Note:
+	webapps(deployment folder)
+		In care of Eclipse intergration with Tomat, internally Eclipse uses "smooth" deployment through which it clones our project & performs deplayment as shown in the following path:
+			*\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
