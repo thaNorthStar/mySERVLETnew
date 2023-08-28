@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 		initParams = { 
 				@WebInitParam(name = "url", value = "jdbc:mysql:///newbatch"), 
 				@WebInitParam(name = "user", value = "root"), 
-				@WebInitParam(name = "password", value = "nFyQ$hCpx8jCfvkf")},loadOnStartup=10)
+				@WebInitParam(name = "password", value = "xxxxxx")},loadOnStartup=10)
 
 public class TestServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
